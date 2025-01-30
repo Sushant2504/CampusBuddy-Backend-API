@@ -18,18 +18,29 @@ const userSchema = new Schema({
 
 userSchema.pre('save', async function(){
    
-    try{
+    try {
          var user = this;
-         const salt = await(brcrypt.genSalt(10));
+         const salt = await (bcrypt.genSalt(10));
          const hashpass = await bcrypt.hash(user.password, salt);
-
+ 
          user.password = hashpass;
-         return next();
-    } catch {
+        
+    } catch(error) {
          throw error;
     }
      
 });
+
+
+userSchema.methods.comparePassword = async function(userPassword) {
+
+  try {
+     const isMatch = await bcrypt.compare(userPassword, this.password)
+     return isMatch;
+  } catch(error) {
+      throw error;
+  }
+}
 
 
 const UserModel = db.model('user', userSchema);
